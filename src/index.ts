@@ -38,18 +38,18 @@ function nextBigInts(length: number) {
     for (let i = 0; i < length; ++i) arr[i] = nextBigInt();
     return arr;
 }
-function print<T>(out: string | number | bigint | Array<T>): void;
+function print<T>(out: string | number | bigint | boolean | Array<T>): void;
 function print<T>(out: Array<T>, separator: string): void;
-function print<T>(out: string | number | bigint | Array<T>, separator?: string) {
+function print<T>(out: string | number | bigint | boolean| Array<T>, separator?: string) {
     if (Array.isArray(out)) {
         outputBuffer += out.join(separator || ' ');
     } else {
         outputBuffer += out;
     }
 }
-function println<T>(out: string | number | bigint | Array<T>): void;
+function println<T>(out: string | number | bigint | boolean | Array<T>): void;
 function println<T>(out: Array<T>, separator: string): void;
-function println<T>(out: string | number | bigint | Array<T>, separator?: string) {
+function println<T>(out: string | number | bigint | boolean | Array<T>, separator?: string) {
     if (Array.isArray(out)) {
         print(out, separator || " ");
     } else {
@@ -88,14 +88,14 @@ function vec(len: number, val: number = 0) {
     return Array<number>(len).fill(val);
 }
 
-function vec2(len1: number, len2: number, val: number = 0) {
+function vec2(len1: number, len2: number = 0, val: number = 0) {
     const arr = Array<Array<number>>(len1);
     for (let i = 0; i < len1; i++)
         arr[i] = vec(len2, val);
     return arr;
 }
 
-function vec3(len1: number, len2: number, len3: number, val: number = 0) {
+function vec3(len1: number, len2: number, len3: number = 0, val: number = 0) {
     const arr = Array<Array<Array<number>>>(len1);
     for (let i = 0; i < len1; i++)
         arr[i] = vec2(len2, len3, val);
@@ -110,40 +110,33 @@ function acc(arr: number[]): number {
 }
 
 function main() {
-    // ここに処理を記述していく。
-    const a = next2DNums(9, 9);
-    for (let row of a) {
-        const mark = vec(10);
-        for (let x of row) {
-            mark[x] = 1;
-        }
-        if (acc(mark) != 9) {
-            print("No");
-            return;
-        }
+    const n = nextNum();
+    const m = nextNum();
+    const g = vec2(n + 1);
+    const a = nextNums(m);
+    const b = nextNums(m);
+    for (let i = 0; i < m; i++) {
+        g[a[i]].push(b[i]); 
+        g[b[i]].push(a[i]);  
     }
-    for (let j = 0; j < 9; j++) {
-        const mark = vec(10);
-        for (let i = 0; i < 9; i++)
-            mark[a[i][j]] = 1;
-        if (acc(mark) != 9) {
-            print("No");
-            return;
+    const color: number[] = [];
+    function dfs(u: number, c: number) : boolean {
+        if (color[u]) {
+            return color[u] == c;
         }
-    }
-
-    const mark = vec3(3, 3, 10);
-    for (let i = 0; i < 9; i++)
-        for (let j = 0; j < 9; j++) {
-            mark[Math.trunc(i / 3)][Math.trunc(j / 3)][a[i][j]] = 1;
-        }
-
-    for (let i = 0; i < 3; i++)
-        for (let j = 0; j < 3; j++)
-            if (acc(mark[i][j]) != 9) {
-                print("No");
-                return;
+        color[u] = c;
+        for (let v of g[u]) {
+            if (!dfs(v, -c)) {
+                return false;
             }
+        }
+        return true;
+    }
+    for (let i = 1; i <= n; i++)
+        if (!color[i] && !dfs(i, 1)) {
+            print("No");
+            return;
+        }
     print("Yes");
 }
 
